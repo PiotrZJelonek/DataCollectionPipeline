@@ -9,23 +9,21 @@ html = page.text
 soup = BeautifulSoup(html, 'html.parser') 
 
 # output
-print('Parses HTML:')
+print("\nParses HTML:")
 print(soup.prettify())
-print("")
 
 # if it does not find anything it returns None
 fish = soup.find(name='tr', attrs={'id': 'gift3', 'class':'gift'})
 
 # output
-print('Gift 3:')
+print("\nGift 3:")
 print(fish)
-print("")
 
 # a list where each item corresponds to each 'td' tag
 fish_row = fish.find_all('td') 
 
 # output
-print(f"Number of 'td' tags: {len(fish_row)}")
+print(f"\nNumber of 'td' tags: {len(fish_row)}")
 print("")
 
 
@@ -56,8 +54,7 @@ python_row = soup.find_all('p')
 
 # output - first 5 paragraphs
 for i in range(min(5,len(python_row))):
-    print("")
-    print(f"paragraph {i}: ")
+    print(f"\nparagraph {i}: ")
     print("")
     print(python_row[i])
 print("")
