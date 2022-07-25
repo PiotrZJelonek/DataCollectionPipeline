@@ -56,6 +56,30 @@ driver = load_and_accept_cookies()
 
 time.sleep(2)
 
+# try: 
+
+prop_container = driver.find_element(by=By.XPATH, value='//div[@class="css-1itfubx edluams0"]') # XPath corresponding to the Container
+
+prop_list = prop_container.find_elements(by=By.XPATH, value='./div')
+link_list = []
+
+for house_property in prop_list:
+    a_tag = house_property.find_element(by=By.TAG_NAME, value='a')
+    link = a_tag.get_attribute('href')
+    link_list.append(link)
+    
+print(f'There are {len(link_list)} properties in this page')
+
+for link in link_list:
+    print(f"  {link}") 
+
+
+
+# except:
+
+#     print('duupa')
+
+
 # Note: below we have to change @id to a value that certainly is on THIS page 
 
 # find a listing on a given page, scrap text
@@ -113,8 +137,6 @@ for key in dict_properties.keys():
 # close the browser
 driver.quit()
 
-print(type(URL))
-
 # dict_properties['Price'].append(price)
 # address = driver.find_element(by=By.XPATH, value='//address[@data-testid="address-label"]').text
 # dict_properties['Address'].append(address)
@@ -141,6 +163,9 @@ print(type(URL))
 # driver.get("http://google.com/")
 # print ("Headless Firefox Initialized")
 # driver.quit()
+
+# Note:
+# geckodriver is located at : /usr/local/bin
 
 # Questions:
 # 1) How to run locally Colab files
