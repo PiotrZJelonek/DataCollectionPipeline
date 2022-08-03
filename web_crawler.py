@@ -1,13 +1,24 @@
+# import libraries
+import time
+
+# import classes
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException
 # from pathlib import Path
-import time
+
+# from selenium import webdriver
+# from selenium.webdriver.common.by import By
+# import time
 
 # Selenium 4.1: https://selenium-python.readthedocs.io/locating-elements.html 
 
 class WebCrawler:
 
-    def __init__(self, URL: str, website: str = ""):
+    def __init__(self, URL: str, maximum_delay: float = 10.0, website: str = ""):
         """
         Initialise WebCrawler instance
 
@@ -32,6 +43,9 @@ class WebCrawler:
             # initialize the driver
             self.driver = webdriver.Firefox()
 
+            # maximum waiting time
+            self.maximum_delay = maximum_delay
+
             # list of links
             self.link_list = []
 
@@ -39,24 +53,30 @@ class WebCrawler:
             self.contents = []
 
             # output
-            print("WebCrawler was successfully instantiated")
+            print("")
+            print("WebCrawler was successfully instantiated!")
+            print("")
 
     def print(self):
         """
         Print (initialised) object
         """
 
+        print("Printing WebCrawler's attributes:")
         print("")
 
         # print website
-        print("website: ")
-        print(f"  {self.website}") 
-        print("")   
+        print("  website: ")
+        print(f"    {self.website}")  
 
         # print URL
-        print("URL: ")
-        print(f"  {self.URL}") 
-        print("")   
+        print("  URL: ")
+        print(f"    {self.URL}") 
+
+        # print waiting time
+        print("  maximum waiting time:")
+        print(f"    {self.maximum_delay}")
+        print("") 
 
     def load_and_accept_cookies(self):
         '''
@@ -75,10 +95,19 @@ class WebCrawler:
             if self.website == "zoopla":
 
                 # This is the id of the frame
-                self.driver.switch_to.frame('gdpr-consent-notice') 
+                WebDriverWait(self.driver, self.maximum_delay).until(EC.presence_of_element_located((By.XPATH, '//*[@id="gdpr-consent-notice"]')))
+                self.driver.switch_to.frame('gdpr-consent-notice')
+                print("Frame Ready!")
 
-                # select an element by Xpath
-                accept_cookies_button = self.driver.find_element(by=By.XPATH, value='//*[@id="save"]')
+                try:
+
+                    # select an element by Xpath
+                    accept_cookies_button = WebDriverWait(self.driver, self.maximum_delay).until(EC.presence_of_element_located((By.XPATH, '//*[@id="save"]')))
+                    print("Accept Cookies Button Ready!")
+
+                except TimeoutException:
+
+                    print("Loading a botton took too much time!")
 
             elif self.website == "righmove":
 
@@ -90,10 +119,10 @@ class WebCrawler:
             # wait a second
             time.sleep(1)
 
-        except:
+        except TimeoutException:
 
-            # If there is no cookies button, we won't find it
-            print('load_and_accept_cookies: Sorry - no cookies!')
+            # output
+            print("Loading a frame took too much time!")
 
         # refresh HTML code, to fix communication error between geckodriver and marionette
         self.driver.refresh()
