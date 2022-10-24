@@ -81,7 +81,6 @@ class WebCrawler:
     def load_and_accept_cookies(self):
         '''
         Open Zoopla/Rightmove and accept the cookies
-
         '''
 
         # now the driver contains the information about the current page
@@ -132,7 +131,7 @@ class WebCrawler:
         
         """
 
-        prop_container = self.driver.find_element(by=By.XPATH, value='//div[@class="css-1itfubx e5pbze00"]')
+        prop_container = self.driver.find_element(by=By.XPATH, value='//div[@class="css-1itfubx e3tdh350"]')
         prop_list = prop_container.find_elements(by=By.XPATH, value='./div')
         links_on_page = []
 
