@@ -49,7 +49,7 @@ def load_and_accept_cookies() -> webdriver.Firefox:
     return driver 
 
 
-def get_links(driver: webdriver.Chrome) -> list:
+def get_link_list(driver: webdriver.Chrome) -> list:
     '''
     Returns a list with all the links in the current page
     Parameters
@@ -63,7 +63,7 @@ def get_links(driver: webdriver.Chrome) -> list:
         A list with all the links in the page
     '''
 
-    prop_container = driver.find_element(by=By.XPATH, value='//div[@class="css-1itfubx e3tdh350"]')
+    prop_container = driver.find_element(by=By.XPATH, value='//div[@class="css-1itfubx e1skdab50"]')
     prop_list = prop_container.find_elements(by=By.XPATH, value='./div')
     link_list = []
 
@@ -78,12 +78,29 @@ big_list = []
 driver = load_and_accept_cookies()
 
 nof_pages = 1
+s_next = '//div[@data-testid="pagination"]/ul//li/a[@aria-label="Page 1"]'
 
 for i in range(nof_pages): # The first 5 pages only
 
-    big_list.extend(get_links(driver)) # Call the function we just created and extend the big list with the returned list
-    next_page_button = driver.find_element(by=By.CLASS_NAME, value='eaoxhr15 css-xtzp5a-ButtonLink-Button-StyledPaginationLink eaqu47p1')
+    time.sleep(2)
+    big_list.extend(get_link_list(driver)) # Call the function we just created and extend the big list with the returned list
+    driver.execute_script("window.scrollTo(0, document.body.scrollHeight);") 
+    # next_page_button = driver.find_element(by=By.XPATH, value='//ul[@class="eybokor8 css-1gny8z8-PaginationContainer-Pagination eaoxhri0"]') # <- this works ;)
+    
+    s = s_next.replace(str(int(i+1)), str(int(i+2)))
+    print(s)
+    next_page_button = driver.find_element(by=By.XPATH, value=s)
     next_page_button.click()
+
+    # next_page_button = driver.find_element(by=By.XPATH, value='//ul[@class="eybokor8 css-1gny8z8-PaginationContainer-Pagination eaoxhri0"]')
+    # next_page_button = driver.find_element(by=By.XPATH, value='/html/body/div[3]/div/main/div/div[4]/div[2]/section/div[2]/div[3]/ul/li[8]/a')
+
+    
+
+
+    # value_string = './/li[@href="https://www.zoopla.co.uk/new-homes/property/london/?q=London&results_sort=newest_listings&search_source=new-homes&page_size=25&pn=2"]'
+    # next_page_button  = driver.find_element(by=By.XPATH, value=value_string )
+    #next_page_button.click()
 
     ## TODO: Click the next button. Don't forget to use sleeps, so the website doesn't suspect
     pass # This pass should be removed once the code is complete
@@ -149,7 +166,7 @@ for i in range(nof_links):
 # # Note: below we have to change @id to a value that certainly is on THIS page 
 
 # # find a listing on a given page, scrap text
-# house_property = driver.find_element(by=By.XPATH, value='//*[@id="listing_62721271"]')
+# house_property = driver.find_element(by=By.XPATH, value='//*[@id="listing_62731443"]')
 # s = house_property.text
 
 # # output
