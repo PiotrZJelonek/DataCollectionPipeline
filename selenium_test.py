@@ -63,7 +63,7 @@ def get_link_list(driver: webdriver.Chrome) -> list:
         A list with all the links in the page
     '''
 
-    prop_container = driver.find_element(by=By.XPATH, value='//div[@class="css-1itfubx e1skdab50"]')
+    prop_container = driver.find_element(by=By.XPATH, value='//div[@class="css-1itfubx ebjry2p0"]')
     prop_list = prop_container.find_elements(by=By.XPATH, value='./div')
     link_list = []
 
@@ -92,11 +92,17 @@ for i in range(nof_pages): # The first 5 pages only
     next_page_button = driver.find_element(by=By.XPATH, value=s)
     next_page_button.click()
 
+    sing_up_for_alerts = driver.find_element(by=By.XPATH, value='/html/body/div[9]')
+    # sing_up_for_alerts = driver.find_element(by=By.XPATH, value='//div[@class="css-7ohbj1-ModalBg e13xjwxo16"]')
+
+    # sing_up_for_alerts = driver.find_element(by=By.XPATH, value='//div/div[@tabindex="-1"]')
+
+
+
+
+
     # next_page_button = driver.find_element(by=By.XPATH, value='//ul[@class="eybokor8 css-1gny8z8-PaginationContainer-Pagination eaoxhri0"]')
     # next_page_button = driver.find_element(by=By.XPATH, value='/html/body/div[3]/div/main/div/div[4]/div[2]/section/div[2]/div[3]/ul/li[8]/a')
-
-    
-
 
     # value_string = './/li[@href="https://www.zoopla.co.uk/new-homes/property/london/?q=London&results_sort=newest_listings&search_source=new-homes&page_size=25&pn=2"]'
     # next_page_button  = driver.find_element(by=By.XPATH, value=value_string )
