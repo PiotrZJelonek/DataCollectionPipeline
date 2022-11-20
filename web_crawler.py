@@ -1,5 +1,8 @@
 # import libraries
 import time
+from collections import defaultdict
+from pathlib import Path
+from math import log10, floor
 
 # import classes
 from selenium import webdriver
@@ -7,8 +10,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.common.exceptions import TimeoutException
-# from pathlib import Path
 
 # from selenium import webdriver
 # from selenium.webdriver.common.by import By
@@ -50,7 +53,7 @@ class WebCrawler:
             self.link_list = []
 
             # placeholder for website contents
-            self.contents = []
+            self.contents = defaultdict(lambda: 0.0)
 
             # output
             print("")
@@ -127,27 +130,115 @@ class WebCrawler:
         self.driver.refresh()
 
     def get_links(self) -> list:
-        """
-        
-        """
+        '''
+        Appends to link_list all the links in the current page.
+        '''
 
-        prop_container = self.driver.find_element(by=By.XPATH, value='//div[@class="css-1itfubx e3tdh350"]')
+        prop_container = self.driver.find_element(by=By.XPATH, value='//div[@data-testid="regular-listings"]')
         prop_list = prop_container.find_elements(by=By.XPATH, value='./div')
         links_on_page = []
 
+        # get a link for each property
         for house_property in prop_list:
             a_tag = house_property.find_element(by=By.TAG_NAME, value='a')
             link = a_tag.get_attribute('href')
             links_on_page.append(link)
 
-        return links_on_page
+        # extend link list
+        (self.link_list).extend(links_on_page)
 
-#
+    def scroll_down(self):
+        '''
+        Scrolls down the page.
+        '''
+
+        self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);") 
+
+    def click_next(self):
+        '''
+        Go to next page.
+        '''
+
+        if self.website == "zoopla":
+
+            button_container = self.driver.find_element(by=By.XPATH, value='//div[@data-testid="pagination"]')
+            a_tags = button_container.find_elements(by=By.TAG_NAME, value='a')
+            for links in a_tags:
+                if links.text == "Next >":
+                    print("\nFound it")
+                    next_page_button = links.get_attribute('href')
+            self.driver.get(next_page_button)
+
+        elif self.website == "righmove":
+
+            print("click-next: not implemented for 'rightmove'")
+
+    def sign_up_for_alerts(self):
+        '''
+        Sign up for the alerts.
+        '''
+
+        if self.website == "zoopla":
+
+            main_container = self.driver.find_element(by=By.XPATH, value='//div[@data-testid="modal-bg"]/div/div/button')
+            sing_up_for_alerts = main_container.find_element(By.XPATH, "./*[name()='svg']")
+            ActionChains(self.driver).move_to_element(sing_up_for_alerts).click().perform()
+
+        elif self.website == "righmove":
+
+            print("sign_up_for_alerts: not implemented for 'rightmove'")
+
+    def collect_links(self, nof_pages=1):
+        '''
+        Scrape the links from a specified number of pages.
+        Store the links in the 'crawler' object as 'link_list'.
+        '''
+
+        # loop over pages
+        for page_number in range(nof_pages): 
+
+            print(f"i: {page_number}")
+
+            time.sleep(2)
+            self.get_links() 
+            self.scroll_down()
+            self.click_next()
+            time.sleep(2)
+
+            if page_number==0:
+                self.sign_up_for_alerts()
+
+    def print_links(self):
+        '''
+        Print all the scraped links.
+        '''
+
+        link_list = crawler.link_list
+
+        # print the list
+        nof_links = len(link_list)
+        n = floor(log10(nof_links - 1))
+        print("")
+        print(f"Total number of links: {nof_links}")
+        print("")
+        for i in range(nof_links):
+            print(f"  ({i:4.0f}) {link_list[i]}")
+            if i == nof_links - 1: 
+                print("")
+
+    def exit(self):
+        '''
+        Close the driver.
+        '''
+
+        self.driver.close()
 
 
 # RUN THE CRAWLER
 
 URL = "https://www.zoopla.co.uk/new-homes/property/london/?q=London&results_sort=newest_listings&search_source=new-homes&page_size=25&pn=1&view_type=list"
+
+nof_pages = 2
 
 crawler = WebCrawler(URL=URL)
 
@@ -155,6 +246,8 @@ crawler.print()
 
 crawler.load_and_accept_cookies()
 
-links_on_page = crawler.get_links()
+crawler.collect_links(nof_pages=nof_pages)
 
-print(links_on_page)
+crawler.print_links()
+
+crawler.exit()

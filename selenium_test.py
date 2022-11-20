@@ -80,7 +80,6 @@ big_list = []
 driver = load_and_accept_cookies()
 
 nof_pages = 1
-s_next = '//div[@data-testid="pagination"]/ul//li/a[@aria-label="Page 1"]'
 
 for page_number in range(nof_pages): # The first 5 pages only
 

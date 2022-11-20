@@ -34,3 +34,11 @@ print(1 == True)
 print(6.2 < 7)
 print(9 >= 9)
 print(False < True)
+
+from collections import defaultdict
+
+zed = defaultdict(lambda: 0.0)
+
+print(zed['carrot'])
+
+print(int(4.15))
