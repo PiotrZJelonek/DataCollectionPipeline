@@ -1,7 +1,7 @@
 async-generator==1.10
 attrs==21.4.0
 beautifulsoup4==4.11.1
-certifi @ file:///opt/conda/conda-bld/certifi_1655968806487/work/certifi
+certifi @ file:///croot/certifi_1665076670883/work/certifi
 cffi==1.15.1
 charset-normalizer==2.1.0
 cryptography==37.0.2
