@@ -175,20 +175,6 @@ for i in range(nof_properties):
     print(bed_count, bath_count, lounge_count)
     print("")
 
-    # print(rooms_list,'\n')
-
-    # bedrooms = int(rooms_list[0])
-    # bathrooms = int(rooms_list[2])
-    # receptions= int(rooms_list[4])
-
-    # print(bedrooms, bathrooms, receptions)
-    # print("")
-
-
-    # dict_properties['Bedrooms'].append(bedrooms)
-
-    # print(bedrooms)
-
     # get description
     div_tag = driver.find_element(by=By.XPATH, value='//div[@data-testid="truncated_text_container"]')
     span_tag = div_tag.find_element(by=By.XPATH, value='.//span')
