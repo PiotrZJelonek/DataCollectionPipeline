@@ -235,19 +235,20 @@ class WebCrawler:
 
 
 # RUN THE CRAWLER
+if __name__ == "__main__":
 
-URL = "https://www.zoopla.co.uk/new-homes/property/london/?q=London&results_sort=newest_listings&search_source=new-homes&page_size=25&pn=1&view_type=list"
+    URL = "https://www.zoopla.co.uk/new-homes/property/london/?q=London&results_sort=newest_listings&search_source=new-homes&page_size=25&pn=1&view_type=list"
 
-nof_pages = 2
+    nof_pages = 2
 
-crawler = WebCrawler(URL=URL)
+    crawler = WebCrawler(URL=URL)
 
-crawler.print()
+    crawler.print()
 
-crawler.load_and_accept_cookies()
+    crawler.load_and_accept_cookies()
 
-crawler.collect_links(nof_pages=nof_pages)
+    crawler.collect_links(nof_pages=nof_pages)
 
-crawler.print_links()
+    crawler.print_links()
 
-crawler.exit()
+    crawler.exit()
