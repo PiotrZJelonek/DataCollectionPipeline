@@ -31,15 +31,31 @@ install geckodriver
 
 [to be cleaned/improved/continued]
 
-## Implement logging
+## Mixin in WebCrawler class
 
-Logging with [loguru](https://loguru.readthedocs.io/en/stable/) allows us to retain a detailed account of web crawler run without redirecting output to the screen. This will be helpful once the code is run in the cloud
-within a container.
+## Implementing logging
 
+Logging with [loguru](https://loguru.readthedocs.io/en/stable/) allows us to retain a detailed account of a web crawler run without redirecting output to screen. It will be helpful once the code is run in the cloud
+within a [docker container](https://www.docker.com/resources/what-container/).
+
+- Implementation of the logger
+```python
+"""
+# import classes
+from loguru import logger
+
+# creating a new log
+logger.remove()
+logger.add("log/web_crawler_{time}.log")
+logger.info("")
+logger.info("--------------------------------------- WEB CRAWLER RUN --------------------------------------- ")
+"""
+```
+Note that <em>logger</em> object is accessible globally, both within an instance of a <em>WebCrawler</em> class object and within ```__main__``` function. 
 - Basic logging
 <p align="center" width="100%">
-    <img width="66%" src="https://github.com/PiotrZJelonek/RPS/blob/develop/pics/cant_loose_with_spock.png?raw=true">
+    <img width="66%" src="https://github.com/PiotrZJelonek/DataCollectionPipeline/blob/develop/pics/logging.png?raw=true">
 </p> 
 <p align = "center">
-Fig. 3 - You can't loose with <em>Spock</em>! 
+Fig. 1 - First <em>loguru</em> log 
 </p>
