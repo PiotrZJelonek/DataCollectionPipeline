@@ -5,6 +5,7 @@ from pathlib import Path
 from math import log10, floor
 
 # import classes
+from loguru import logger
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -34,7 +35,7 @@ class WebCrawler:
         # ....
 
         if website not in ["rightmove", "zoopla",""]:
-            print("WebCrawler: unknown website")
+            logger.info("WebCrawler: unknown website")
         else:
         
             # website (default is "zoopla")
@@ -56,30 +57,30 @@ class WebCrawler:
             self.contents = defaultdict(lambda: 0.0)
 
             # output
-            print("")
-            print("WebCrawler was successfully instantiated!")
-            print("")
+            logger.info("")
+            logger.info("WebCrawler was successfully instantiated!")
+            logger.info("")
 
     def print(self):
         """
         Print (initialised) object
         """
 
-        print("Printing WebCrawler's attributes:")
-        print("")
+        logger.info("Printing WebCrawler's attributes:")
+        logger.info("")
 
         # print website
-        print("  website: ")
-        print(f"    {self.website}")  
+        logger.info("  website: ")
+        logger.info(f"    {self.website}")  
 
         # print URL
-        print("  URL: ")
-        print(f"    {self.URL}") 
+        logger.info("  URL: ")
+        logger.info(f"    {self.URL}") 
 
         # print waiting time
-        print("  maximum waiting time:")
-        print(f"    {self.maximum_delay}")
-        print("") 
+        logger.info("  maximum waiting time:")
+        logger.info(f"    {self.maximum_delay}")
+        logger.info("") 
 
     def load_and_accept_cookies(self):
         '''
@@ -99,17 +100,17 @@ class WebCrawler:
                 # This is the id of the frame
                 WebDriverWait(self.driver, self.maximum_delay).until(EC.presence_of_element_located((By.XPATH, '//*[@id="gdpr-consent-notice"]')))
                 self.driver.switch_to.frame('gdpr-consent-notice')
-                print("Frame Ready!")
+                logger.info("Frame Ready!")
 
                 try:
 
                     # select an element by Xpath
                     accept_cookies_button = WebDriverWait(self.driver, self.maximum_delay).until(EC.presence_of_element_located((By.XPATH, '//*[@id="save"]')))
-                    print("Accept Cookies Button Ready!")
+                    logger.info("Accept Cookies Button Ready!")
 
                 except TimeoutException:
 
-                    print("Loading a botton took too much time!")
+                    logger.info("Loading a botton took too much time!")
 
             elif self.website == "righmove":
 
@@ -124,7 +125,7 @@ class WebCrawler:
         except TimeoutException:
 
             # output
-            print("Loading a frame took too much time!")
+            logger.info("Loading a frame took too much time!")
 
         # refresh HTML code, to fix communication error between geckodriver and marionette
         self.driver.refresh()
@@ -165,13 +166,13 @@ class WebCrawler:
             a_tags = button_container.find_elements(by=By.TAG_NAME, value='a')
             for links in a_tags:
                 if links.text == "Next >":
-                    print("\nFound it")
+                    # logger.info("\nFound it!")
                     next_page_button = links.get_attribute('href')
             self.driver.get(next_page_button)
 
         elif self.website == "righmove":
 
-            print("click-next: not implemented for 'rightmove'")
+            logger.info("click-next: not implemented for 'rightmove'")
 
     def sign_up_for_alerts(self):
         '''
@@ -186,7 +187,7 @@ class WebCrawler:
 
         elif self.website == "righmove":
 
-            print("sign_up_for_alerts: not implemented for 'rightmove'")
+            logger.info("sign_up_for_alerts: not implemented for 'rightmove'")
 
     def collect_links(self, nof_pages=1):
         '''
@@ -197,7 +198,7 @@ class WebCrawler:
         # loop over pages
         for page_number in range(nof_pages): 
 
-            print(f"i: {page_number}")
+            # logger.info(f"i: {page_number}")
 
             time.sleep(2)
             self.get_links() 
@@ -218,13 +219,13 @@ class WebCrawler:
         # print the list
         nof_links = len(link_list)
         n = floor(log10(nof_links - 1))
-        print("")
-        print(f"Total number of links: {nof_links}")
-        print("")
+        logger.info("")
+        logger.info(f"Total number of links: {nof_links}")
+        logger.info("")
         for i in range(nof_links):
-            print(f"  ({i:4.0f}) {link_list[i]}")
+            logger.info(f"  ({i:4.0f}) {link_list[i]}")
             if i == nof_links - 1: 
-                print("")
+                logger.info("")
 
     def exit(self):
         '''
@@ -236,6 +237,12 @@ class WebCrawler:
 
 # RUN THE CRAWLER
 if __name__ == "__main__":
+
+    # creating a new log
+    logger.remove()
+    logger.add("log/web_crawler_{time}.log")
+    logger.info("")
+    logger.info("--------------------------------------- WEB CRAWLER RUN --------------------------------------- ")
 
     URL = "https://www.zoopla.co.uk/new-homes/property/london/?q=London&results_sort=newest_listings&search_source=new-homes&page_size=25&pn=1&view_type=list"
 
