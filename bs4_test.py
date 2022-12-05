@@ -107,3 +107,62 @@ ar = AnimalReporter('koala')
 animal_class = ar.get_class()
 
 print(f"animal class: {animal_class}")
+
+###########
+
+print("")
+print("Getting images")
+print("")
+
+import requests
+from bs4 import BeautifulSoup
+from uuid import uuid4
+
+page_url = "http://pythonscraping.com/pages/page3.html"
+response = requests.get(page_url)
+
+print(" dir(response):")
+print(dir(response))
+print("")
+
+html = response.content
+html = BeautifulSoup(html, 'html.parser')
+print("html.prettify():")
+print(html.prettify())
+print("")
+
+products = html.find_all('tr')[2:]
+
+print("products:")
+print(products)
+print("")
+
+def download_image(img_url, fp):
+    img_data = requests.get(img_url).content
+    with open(fp, 'wb') as handler:
+        handler.write(img_data)
+
+
+for product in products:
+    id = str(uuid4())
+
+    data = product.find_all('td')
+    img = data.pop()
+    img_src = img.img.attrs["src"]
+
+    img_src = page_url[:-16] + img_src[3:]
+    print(img_src)
+    download_image(img_src, f"images/{id}.jpg")
+
+    data = [feature.txt for feature in data]
+    title, description, price = data
+
+    product_data = {
+        "id": id,
+        "name": title,
+        "description": description,
+        "price": price,
+        # "img": local_image_filepath
+    }
+
+
