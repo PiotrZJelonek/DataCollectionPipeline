@@ -30,3 +30,16 @@ pip install beautifulsoup4
 install geckodriver
 
 [to be cleaned/improved/continued]
+
+## Implement logging
+
+Logging with [loguru](https://loguru.readthedocs.io/en/stable/) allows us to retain a detailed account of web crawler run without redirecting output to the screen. This will be helpful once the code is run in the cloud
+within a container.
+
+- Basic logging
+<p align="center" width="100%">
+    <img width="66%" src="https://github.com/PiotrZJelonek/RPS/blob/develop/pics/cant_loose_with_spock.png?raw=true">
+</p> 
+<p align = "center">
+Fig. 3 - You can't loose with <em>Spock</em>! 
+</p>
