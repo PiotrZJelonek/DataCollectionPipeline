@@ -49,6 +49,7 @@ logger.remove()
 logger.add("log/web_crawler_{time}.log")
 logger.info("")
 logger.info("--------------------------------------- WEB CRAWLER RUN --------------------------------------- ")
+logger.info("")
 """
 ```
 Note that <em>logger</em> object is accessible globally, both within an instance of a <em>WebCrawler</em> class object and within ```__main__``` function. 
@@ -59,3 +60,9 @@ Note that <em>logger</em> object is accessible globally, both within an instance
 <p align = "center">
 Fig. 1 - First <em>loguru</em> log 
 </p>
+
+## Driving Firefox browser using Selenium
+
+[Selenium](https://www.selenium.dev/documentation/webdriver/)
+
+## Doownloading images from websites

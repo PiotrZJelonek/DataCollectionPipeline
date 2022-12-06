@@ -1,5 +1,7 @@
 # import libraries
 import time
+import numpy as np
+import pandas as pd
 from collections import defaultdict
 from pathlib import Path
 from math import log10, floor
@@ -234,6 +236,87 @@ class WebCrawler:
 
         self.driver.close()
 
+    def fetch_contents(self):
+        '''
+        This function gets contents from a website
+        '''
+
+        link_list = crawler.link_list
+        driver = self.driver
+
+        # create placeholder for scraped data
+        properties_dict = {'PRICE': [], 'ADDRESS': [], 'BEDROOMS': [], 'BATHROOMS': [], 'RECEPTIONS': [], 'TOTAL AREA': [], 'DESCRIPTION': []}
+
+        # iterate thorugh property links    
+        for link in link_list[1:2]:
+
+            # get link
+            driver.get(link) 
+
+            # get price
+            price = driver.find_element(by=By.XPATH, value='//p[@data-testid="price"]').text
+            numeric_price = int(price[1:].replace(',',''))
+            properties_dict['PRICE'].append(numeric_price)
+
+            # get address
+            address = driver.find_element(by=By.XPATH, value='//address[@data-testid="address-label"]').text
+            properties_dict['ADDRESS'].append(address)
+
+            # get all the rooms
+            rooms = driver.find_element(by=By.XPATH, value='//div[@class="c-PJLV c-PJLV-iiNveLf-css"]').text
+    
+            # parse and read numbers
+            rooms_list = rooms.split('\n')
+
+            bed_count = 0
+            bath_count = 0
+            lounge_count = 0
+            total_area = 0
+            for room in rooms_list:
+
+                room_parsed = room.split(' ')
+                value = float(room_parsed[0].replace(',',''))
+                tag = room_parsed[1].lower()
+
+                if bed_count == 0:
+                    if tag in ['bed','beds','bedroom','bedroom']:
+                        bed_count = int(value)
+                if bath_count == 0:
+                    if tag in ['bath','baths','bathroom','bahrooms']:
+                        bath_count = int(value)
+                if lounge_count == 0:
+                    if tag in ['lounge','lounges','reception','receptions']:
+                        lounge_count = int(value)
+                if total_area == 0:
+                    if tag in ['sq.']:
+                        total_area = value
+
+            properties_dict['BEDROOMS'].append(bed_count)
+            properties_dict['BATHROOMS'].append(bath_count)
+            properties_dict['RECEPTIONS'].append(lounge_count)
+            properties_dict['TOTAL AREA'].append(total_area)
+
+            print("") 
+            print(numeric_price)
+            print(bed_count, bath_count, lounge_count, total_area)
+            print("")
+
+            # get description
+            div_tag = driver.find_element(by=By.XPATH, value='//div[@data-testid="truncated_text_container"]')
+            span_tag = div_tag.find_element(by=By.XPATH, value='.//span')
+            description = span_tag.text
+            properties_dict['DESCRIPTION'].append(description)
+
+            # sleep
+            time.sleep(1)
+
+            # 
+            floorplan_button_container = driver.find_element(by=By.XPATH, value='//button[@data-testid="floorplans-label"]')
+            
+
+
+        return properties_dict
+
 
 # RUN THE CRAWLER
 if __name__ == "__main__":
@@ -258,4 +341,13 @@ if __name__ == "__main__":
 
     crawler.print_links()
 
-    crawler.exit()
+    properties_dict = crawler.fetch_contents()
+
+    df = pd.DataFrame.from_dict(properties_dict)
+    df['TOTAL AREA'] = df['TOTAL AREA'].apply(lambda x: x if x!=0 else np.nan)
+
+    df.to_csv('output/df.csv')
+
+    print(df)
+
+    # crawler.exit()
