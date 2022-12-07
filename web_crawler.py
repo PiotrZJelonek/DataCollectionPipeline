@@ -22,6 +22,14 @@ from selenium.common.exceptions import TimeoutException
 
 # Selenium 4.1: https://selenium-python.readthedocs.io/locating-elements.html 
 
+def scroll_to_element(driver, element_locator):
+    actions = ActionChains(driver)
+    try:
+        actions.move_to_element(element_locator).click().perform()
+    except:
+        driver.execute_script("arguments[0].scrollIntoView(true);", element_locator) 
+        
+
 class WebCrawler:
 
     def __init__(self, URL: str, maximum_delay: float = 10.0, website: str = ""):
@@ -48,6 +56,7 @@ class WebCrawler:
 
             # initialize the driver
             self.driver = webdriver.Firefox()
+            (self.driver).maximize_window()
 
             # maximum waiting time
             self.maximum_delay = maximum_delay
@@ -183,9 +192,14 @@ class WebCrawler:
 
         if self.website == "zoopla":
 
-            main_container = self.driver.find_element(by=By.XPATH, value='//div[@data-testid="modal-bg"]/div/div/button')
-            sing_up_for_alerts = main_container.find_element(By.XPATH, "./*[name()='svg']")
-            ActionChains(self.driver).move_to_element(sing_up_for_alerts).click().perform()
+            try: 
+                main_container = self.driver.find_element(by=By.XPATH, value='//div[@data-testid="modal-bg"]/div/div/button')
+                sing_up_for_alerts = main_container.find_element(By.XPATH, "./*[name()='svg']")
+                ActionChains(self.driver).move_to_element(sing_up_for_alerts).click().perform()
+            
+            except:
+
+                pass 
 
         elif self.website == "righmove":
 
@@ -248,7 +262,7 @@ class WebCrawler:
         properties_dict = {'PRICE': [], 'ADDRESS': [], 'BEDROOMS': [], 'BATHROOMS': [], 'RECEPTIONS': [], 'TOTAL AREA': [], 'DESCRIPTION': []}
 
         # iterate thorugh property links    
-        for link in link_list[1:2]:
+        for link in link_list[3:4]:
 
             # get link
             driver.get(link) 
@@ -311,7 +325,17 @@ class WebCrawler:
             time.sleep(1)
 
             # 
+            
             floorplan_button_container = driver.find_element(by=By.XPATH, value='//button[@data-testid="floorplans-label"]')
+            time.sleep(1)
+
+            driver.execute_script("arguments[0].scrollIntoView();", WebDriverWait(driver, 2).until(EC.visibility_of_element_located((By.XPATH, '//button[@data-testid="floorplans-label"]'))))
+
+            # scroll_to_element(driver,floorplan_button_container)
+
+            ActionChains(driver).move_to_element(floorplan_button_container).click().perform()
+
+            # ActionChains(driver).move_to_element(floorplan_button_container).click().perform()
             
 
 
@@ -351,3 +375,15 @@ if __name__ == "__main__":
     print(df)
 
     # crawler.exit()
+
+    # https://postcodes.io
+
+    # def scroll_to_element(driver, element_locator):
+    # actions = ActionChains(driver)
+    # try:
+    # actions.move_to_element(element_locator).perform()
+    # except MoveTargetOutOfBoundsException as e:
+    # print(e)
+    # driver.execute_script("arguments[0].scrollIntoView(true);", element_locator) 
+
+    # drvier.execute_script("arguments[0].scrollIntoView();", WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.XPATH, xxxxx))) 
