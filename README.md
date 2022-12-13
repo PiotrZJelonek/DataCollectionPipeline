@@ -31,7 +31,11 @@ install geckodriver
 
 [to be cleaned/improved/continued]
 
-## Mixin in WebCrawler class
+## Driving Firefox browser using Selenium
+
+[Selenium](https://www.selenium.dev/documentation/webdriver/)
+
+## Doownloading images from websites
 
 ## Implementing logging
 
@@ -61,8 +65,57 @@ Note that <em>logger</em> object is accessible globally, both within an instance
 Fig. 1 - First <em>loguru</em> log 
 </p>
 
-## Driving Firefox browser using Selenium
+## Mixin in WebCrawler class
 
-[Selenium](https://www.selenium.dev/documentation/webdriver/)
+- Implementation of the mixin
+```python
+"""
+# Mixin class to log objects
+class LogObjectMixin:
 
-## Doownloading images from websites
+    def _is_protected(self, prop):
+        # check if attribute is protected
+        
+        return prop.startswith('_')
+
+    def log(self, obj):
+        # Log (initialised) object
+
+        # list attributes: non-callable, non-private, non-protected
+        attribute_list = [a for a in dir(self) if not callable(getattr(self, a)) and not a.startswith('__') and not self._is_protected(a)]
+        attribute_list = sorted(attribute_list)
+
+        # log class name and attributes
+        logger.info(f"Logging {obj.__class__.__name__} class object")
+        logger.info("")
+        logger.info("  Attributes:")
+
+        # populate the dictionary
+        d = defaultdict(lambda: "Not defined")
+        for a in attribute_list :
+            d[a] = self.__getattribute__(a)
+
+        # print all the keys
+        for key in d.keys():
+            logger.info(f"    {key}:")
+            logger.info(f"      {d[key]}")
+        logger.info("")
+
+        # list methods: callable, non-private, non-protected
+        method_list = [a for a in dir(self) if callable(getattr(self, a)) and not a.startswith('__') and not self._is_protected(a)]
+        method_list = sorted(method_list)
+
+        # log methods
+        logger.info("  Methods:")
+        for m in method_list:
+            logger.info(f"    {m}():")
+        logger.info("")
+"""
+```
+- Using the mixin as a parent to WebCrawler class. As a result, WebCrawler instances inherit a method which can log <em>any</em> object.
+<p align="center" width="100%">
+    <img width="66%" src="https://github.com/PiotrZJelonek/DataCollectionPipeline/blob/develop/pics/mixin.png?raw=true">
+</p> 
+<p align = "center">
+Fig. 2 - Logging object <em>attributes</em> and <em>mrthods</em>  with loguru
+</p>

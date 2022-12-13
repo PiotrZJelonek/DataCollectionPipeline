@@ -20,17 +20,64 @@ from selenium.common.exceptions import TimeoutException
 # from selenium.webdriver.common.by import By
 # import time
 
+# Note: In python, there are no 'protected' and 'private' methods - these are just conventions.
+# If method name is preceeded by a single dash - it is 'protected', and should not be changed
+# If it is preceded by double-dash - it is 'private' and shoudl only be called form within the class
+
+# Mixin class to log objects
+class LogObjectMixin:
+
+    def _is_protected(self, prop):
+        # check if attribute is protected
+        return prop.startswith('_')
+
+    def log(self, obj):
+        """
+        Log (initialised) object
+        """
+
+        # list attributes: non-callable, non-private, non-protected
+        attribute_list = [a for a in dir(self) if not callable(getattr(self, a)) and not a.startswith('__') and not self._is_protected(a)]
+        attribute_list = sorted(attribute_list)
+
+        # log class name and attributes
+        logger.info(f"Logging {obj.__class__.__name__} class object")
+        logger.info("")
+        logger.info("  Attributes:")
+
+        # populate the dictionary
+        d = defaultdict(lambda: "Not defined")
+        for a in attribute_list :
+            d[a] = self.__getattribute__(a)
+
+        # print all the keys
+        for key in d.keys():
+            logger.info(f"    {key}:")
+            logger.info(f"      {d[key]}")
+        logger.info("")
+
+        # list methods: callable, non-private, non-protected
+        method_list = [a for a in dir(self) if callable(getattr(self, a)) and not a.startswith('__') and not self._is_protected(a)]
+        method_list = sorted(method_list)
+
+        # log methods
+        logger.info("  Methods:")
+        for m in method_list:
+            logger.info(f"    {m}():")
+        logger.info("")
+
+
 # Selenium 4.1: https://selenium-python.readthedocs.io/locating-elements.html 
 
-def scroll_to_element(driver, element_locator):
-    actions = ActionChains(driver)
-    try:
-        actions.move_to_element(element_locator).click().perform()
-    except:
-        driver.execute_script("arguments[0].scrollIntoView(true);", element_locator) 
+# def scroll_to_element(driver, element_locator):
+#     actions = ActionChains(driver)
+#     try:
+#         actions.move_to_element(element_locator).click().perform()
+#     except:
+#         driver.execute_script("arguments[0].scrollIntoView(true);", element_locator) 
         
 
-class WebCrawler:
+class WebCrawler(LogObjectMixin):
 
     def __init__(self, URL: str, maximum_delay: float = 10.0, website: str = ""):
         """
@@ -72,26 +119,26 @@ class WebCrawler:
             logger.info("WebCrawler was successfully instantiated!")
             logger.info("")
 
-    def print(self):
-        """
-        Print (initialised) object
-        """
+    # def print(self):
+    #     """
+    #     Print (initialised) object
+    #     """
 
-        logger.info("Printing WebCrawler's attributes:")
-        logger.info("")
+    #     logger.info("Printing WebCrawler's attributes:")
+    #     logger.info("")
 
-        # print website
-        logger.info("  website: ")
-        logger.info(f"    {self.website}")  
+    #     # print website
+    #     logger.info("  website: ")
+    #     logger.info(f"    {self.website}")  
 
-        # print URL
-        logger.info("  URL: ")
-        logger.info(f"    {self.URL}") 
+    #     # print URL
+    #     logger.info("  URL: ")
+    #     logger.info(f"    {self.URL}") 
 
-        # print waiting time
-        logger.info("  maximum waiting time:")
-        logger.info(f"    {self.maximum_delay}")
-        logger.info("") 
+    #     # print waiting time
+    #     logger.info("  maximum waiting time:")
+    #     logger.info(f"    {self.maximum_delay}")
+    #     logger.info("") 
 
     def load_and_accept_cookies(self):
         '''
@@ -262,7 +309,7 @@ class WebCrawler:
         properties_dict = {'PRICE': [], 'ADDRESS': [], 'BEDROOMS': [], 'BATHROOMS': [], 'RECEPTIONS': [], 'TOTAL AREA': [], 'DESCRIPTION': []}
 
         # iterate thorugh property links    
-        for link in link_list[3:4]:
+        for link in link_list: #[3:4]:
 
             # get link
             driver.get(link) 
@@ -324,18 +371,17 @@ class WebCrawler:
             # sleep
             time.sleep(1)
 
-            # 
-            
-            floorplan_button_container = driver.find_element(by=By.XPATH, value='//button[@data-testid="floorplans-label"]')
-            time.sleep(1)
+            # # 
+            # floorplan_button_container = driver.find_element(by=By.XPATH, value='//button[@data-testid="floorplans-label"]')
+            # time.sleep(1)
 
-            driver.execute_script("arguments[0].scrollIntoView();", WebDriverWait(driver, 2).until(EC.visibility_of_element_located((By.XPATH, '//button[@data-testid="floorplans-label"]'))))
+            # driver.execute_script("arguments[0].scrollIntoView();", WebDriverWait(driver, 2).until(EC.visibility_of_element_located((By.XPATH, '//button[@data-testid="floorplans-label"]'))))
 
-            # scroll_to_element(driver,floorplan_button_container)
-
-            ActionChains(driver).move_to_element(floorplan_button_container).click().perform()
+            # # scroll_to_element(driver,floorplan_button_container)
 
             # ActionChains(driver).move_to_element(floorplan_button_container).click().perform()
+
+            # # ActionChains(driver).move_to_element(floorplan_button_container).click().perform()
             
 
 
@@ -357,7 +403,7 @@ if __name__ == "__main__":
 
     crawler = WebCrawler(URL=URL)
 
-    crawler.print()
+    crawler.log(crawler)
 
     crawler.load_and_accept_cookies()
 

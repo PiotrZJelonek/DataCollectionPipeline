@@ -178,7 +178,7 @@ data = preprocessor.remove_duplicata_data(data)
 data = preprocessor.remove_rows_with_missing_values(data)
 database.insert_data(data)
 
-# Note: In python, you cannot have a 'protected' and 'private' methods - these are just conventions.
+# Note: In python, there are no 'protected' and 'private' methods - these are just conventions.
 # If method name is preceeded by a single dash - it is 'protected', and should not be changed
 # If it is preceded by double-dash - it is 'private' and shoudl only be called form within the class
 
