@@ -74,13 +74,11 @@ Fig. 1 - First <em>loguru</em> log
 class LogObjectMixin:
 
     def _is_protected(self, prop):
-        # check if attribute is protected
-        
+        ## check if attribute is protected
         return prop.startswith('_')
 
     def log(self, obj):
-        # Log (initialised) object
-
+        ## Log (initialised) object
         # list attributes: non-callable, non-private, non-protected
         attribute_list = [a for a in dir(self) if not callable(getattr(self, a)) and not a.startswith('__') and not self._is_protected(a)]
         attribute_list = sorted(attribute_list)
@@ -112,10 +110,10 @@ class LogObjectMixin:
         logger.info("")
 """
 ```
-- Using the mixin as a parent to WebCrawler class. As a result, WebCrawler instances inherit a method which can log <em>any</em> object.
+- Using the mixin as a parent to <em>WebCrawler</em> class. As a result, <em>WebCrawler</em> instances inherit a method which can log <em>any</em> object.
 <p align="center" width="100%">
     <img width="66%" src="https://github.com/PiotrZJelonek/DataCollectionPipeline/blob/develop/pics/mixin.png?raw=true">
 </p> 
 <p align = "center">
-Fig. 2 - Logging object <em>attributes</em> and <em>mrthods</em>  with loguru
+Fig. 2 - Logging object <em>attributes</em> and <em>methods</em>  with loguru
 </p>
