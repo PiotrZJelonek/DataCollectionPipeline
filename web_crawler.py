@@ -2,9 +2,12 @@
 import time
 import numpy as np
 import pandas as pd
+import requests
 from collections import defaultdict
 from pathlib import Path
 from math import log10, floor
+from uuid import uuid4
+import urllib
 
 # import classes
 from loguru import logger
@@ -23,6 +26,11 @@ from selenium.common.exceptions import TimeoutException
 # Note: In python, there are no 'protected' and 'private' methods - these are just conventions.
 # If method name is preceeded by a single dash - it is 'protected', and should not be changed
 # If it is preceded by double-dash - it is 'private' and shoudl only be called form within the class
+
+def download_image(img_url, fp):
+    img_data = requests.get(img_url).content
+    with open(fp, 'wb') as handler:
+        handler.write(img_data)
 
 # Mixin class to log objects
 class LogObjectMixin:
@@ -103,7 +111,6 @@ class WebCrawler(LogObjectMixin):
 
             # initialize the driver
             self.driver = webdriver.Firefox()
-            (self.driver).maximize_window()
 
             # maximum waiting time
             self.maximum_delay = maximum_delay
@@ -118,27 +125,6 @@ class WebCrawler(LogObjectMixin):
             logger.info("")
             logger.info("WebCrawler was successfully instantiated!")
             logger.info("")
-
-    # def print(self):
-    #     """
-    #     Print (initialised) object
-    #     """
-
-    #     logger.info("Printing WebCrawler's attributes:")
-    #     logger.info("")
-
-    #     # print website
-    #     logger.info("  website: ")
-    #     logger.info(f"    {self.website}")  
-
-    #     # print URL
-    #     logger.info("  URL: ")
-    #     logger.info(f"    {self.URL}") 
-
-    #     # print waiting time
-    #     logger.info("  maximum waiting time:")
-    #     logger.info(f"    {self.maximum_delay}")
-    #     logger.info("") 
 
     def load_and_accept_cookies(self):
         '''
@@ -178,7 +164,7 @@ class WebCrawler(LogObjectMixin):
             accept_cookies_button.click()
 
             # wait a second
-            time.sleep(1)
+            time.sleep(3)
 
         except TimeoutException:
 
@@ -297,7 +283,25 @@ class WebCrawler(LogObjectMixin):
 
         self.driver.close()
 
-    def fetch_contents(self):
+    def maximize(self):
+        '''
+        Maximize the window.
+        '''
+
+        (self.driver).maximize_window()
+
+    def scroll_to_element(self, element_locator):
+        '''
+        Scroll to element [<-check this one with Maya]
+        '''
+        driver = self.driver
+        actions = ActionChains(driver)
+        try:
+            actions.move_to_element(element_locator).click().perform()
+        except:
+            driver.execute_script("arguments[0].scrollIntoView(true);", element_locator) 
+
+    def scrap_website(self):
         '''
         This function gets contents from a website
         '''
@@ -309,7 +313,7 @@ class WebCrawler(LogObjectMixin):
         properties_dict = {'PRICE': [], 'ADDRESS': [], 'BEDROOMS': [], 'BATHROOMS': [], 'RECEPTIONS': [], 'TOTAL AREA': [], 'DESCRIPTION': []}
 
         # iterate thorugh property links    
-        for link in link_list: #[3:4]:
+        for link in link_list[0:1]:
 
             # get link
             driver.get(link) 
@@ -357,10 +361,10 @@ class WebCrawler(LogObjectMixin):
             properties_dict['RECEPTIONS'].append(lounge_count)
             properties_dict['TOTAL AREA'].append(total_area)
 
-            print("") 
-            print(numeric_price)
-            print(bed_count, bath_count, lounge_count, total_area)
-            print("")
+            # print("") 
+            # print(numeric_price)
+            # print(bed_count, bath_count, lounge_count, total_area)
+            # print("")
 
             # get description
             div_tag = driver.find_element(by=By.XPATH, value='//div[@data-testid="truncated_text_container"]')
@@ -371,21 +375,158 @@ class WebCrawler(LogObjectMixin):
             # sleep
             time.sleep(1)
 
-            # # 
-            # floorplan_button_container = driver.find_element(by=By.XPATH, value='//button[@data-testid="floorplans-label"]')
+            image_sources_list = driver.find_elements(by=By.XPATH, value='//li[@data-testid="gallery-image"]/div[@data-testid="gallery-image-slide-wrapper"]/picture/img')
+            print(len(image_sources_list))
+
+            time.sleep(5)
+
+            get_next_img_flag = True
+            image_urls_list=[]
+
+            while get_next_img_flag:
+
+                driver = self.driver
+
+                # get a pic url
+                img_tag = driver.find_element(by=By.XPATH, value='//li[@data-testid="gallery-image"]')
+                img_wrapper = img_tag.find_element(by=By.XPATH, value='//div[@data-testid="gallery-image-slide-wrapper"]')
+                img = img_wrapper.find_element(by=By.XPATH, value='//picture/img')
+                src = img.get_attribute("src")
+
+                print(src)
+
+                # append to a list
+                image_urls_list.append(src)
+
+                # sleep
+                time.sleep(1)
+
+                try: 
+                    next_img_button = driver.find_element(by=By.XPATH, value='//button[@data-testid="arrow_right"]').click()
+                    self.scroll_down()
+                except:
+                    pass
+                    # get_next_img_flag = False
+
+
+            # # # get pics
+            # # div_tag = driver.find_element(by=By.XPATH, value='//div[@data-testid="gallery-image-slide-wrapper"]')
+            # # img = div_tag.find_element(by=By.XPATH, value='//picture/img')
+            # # zed = img.get_attribute("src")
+
+            # # sleep
             # time.sleep(1)
 
-            # driver.execute_script("arguments[0].scrollIntoView();", WebDriverWait(driver, 2).until(EC.visibility_of_element_located((By.XPATH, '//button[@data-testid="floorplans-label"]'))))
+            # # self.scroll_down()
 
-            # # scroll_to_element(driver,floorplan_button_container)
+            # self.driver.execute_script("window.scrollTo(0, document.body.scrollHeight);") 
 
-            # ActionChains(driver).move_to_element(floorplan_button_container).click().perform()
+            # image_sources_list = driver.find_elements(by=By.XPATH, value='//div[@data-testid="gallery-image"]') # /div[@data-testid="gallery-image-slide-wrapper"]/picture/img')
+            
+            # print(len(image_sources_list))
+            
+            # image_urls_list=[]
+            # for img_src in image_sources_list:
+            #     src = img_src.get_attribute("src")
+            #     print(src)
+            #     image_urls_list.append(src)
 
-            # # ActionChains(driver).move_to_element(floorplan_button_container).click().perform()
+            # next_img_button = driver.find_element(by=By.XPATH, value='//button[@data-testid="arrow_right"]').click()
+
+
+            # # for url in image_urls_list:
+            # #     print(url)
+
+
+
+
+            # urllib allows downloading images
+            # when googling, put 'python' 'selenium' to avoid tips for java
+
+            # zed = img.getAttribute("src")
+
+            # zed = getattr("src")
+
+            # print(zed)
+    
+
+            # print(l.getAttribute("src"))
+
+
+
+            # WebElement element = driver.findElement(By.id("SubmitButton"));
+            # Point point = element.getLocation();
+            # System.out.println("X cordinate : " + point.x + "Y cordinate: " + point.y);
+
             
 
+            # driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
+
+            # Top 25 selenium commands you shoudl know
+            # https://www.softwaretestinghelp.com/selenium-webdriver-commands-selenium-tutorial-17/
+
+            
+            
+            # src = img.click()
+
+            #Get image links
+
+    #         from selenium import webdriver.
+    #         options.add_argument('--ignore-certificate-errors')
+    #         options.add_argument("--test-type")
+    #         options.binary_location = "/usr/bin/chromium"
+    #         driver.get('https://imgur.com/')
+    #         images = driver.find_elements_by_tag_name('img')
+    #         for image in images:
+    #             print(image.get_attribute('src'))
+
+
+            
+# <img src="https://lid.zoocdn.com/u/2400/1800/5bc72e1cee05e8b96f207f47e5be365a44b32039.png" role="img" alt="Property photo 1 of 15. " draggable="false">
+
+          
+            # floorplan_button_container = driver.find_element(by=By.XPATH, value='//button[@data-testid="floorplans-label"]')
+            # # print(floorplan_button_container)
+            # time.sleep(3)
+            
+            # driver.execute_script("arguments[0].click();", floorplan_button_container)
+
+            # # print(floor_plans_popup)
+
+            # floor_plans_wrapper = driver.find_element(by=By.XPATH, value='.//div[@data-testid="gallery-image-slide-wrapper"]')
+
+            # floor_plans = floor_plans_wrapper.find_element(by=By.XPATH, value='//picture/img')
+
+            # print(floor_plans)
+
+            # time.sleep(1)
+
+
+
+
+            # url = driver.current_url()
+
+            # print(url)
+
+            # download_image(url,f"images/pic.jpg")
+
+            # <source srcset="https://lid.zoocdn.com/u/480/360/69b3a421a1776ec2c1baec8f383bf911efaaeee3.jpg 480w, https://lid.zoocdn.com/u/768/576/69b3a421a1776ec2c1baec8f383bf911efaaeee3.jpg 768w, https://lid.zoocdn.com/u/1024/768/69b3a421a1776ec2c1baec8f383bf911efaaeee3.jpg 1024w, https://lid.zoocdn.com/u/1080/810/69b3a421a1776ec2c1baec8f383bf911efaaeee3.jpg 1080w, https://lid.zoocdn.com/u/1200/900/69b3a421a1776ec2c1baec8f383bf911efaaeee3.jpg 1200w, https://lid.zoocdn.com/u/1600/1200/69b3a421a1776ec2c1baec8f383bf911efaaeee3.jpg 1600w, https://lid.zoocdn.com/u/2400/1800/69b3a421a1776ec2c1baec8f383bf911efaaeee3.jpg 2400w" sizes="(min-width: 1500px) 1280px, (min-width: 960px) 85vw, 100vw">
+            
+            # <img src=   "https://lid.zoocdn.com/u/2400/1800/69b3a421a1776ec2c1baec8f383bf911efaaeee3.jpg" role="img" alt="Floor plan 1 of 1. Floorplan" draggable="false">
 
         return properties_dict
+
+
+# general functions
+
+def clean_and_save_results(properties_dict):
+
+    df = pd.DataFrame.from_dict(properties_dict)
+    df['TOTAL AREA'] = df['TOTAL AREA'].apply(lambda x: x if x!=0 else np.nan)
+
+    df.to_csv('output/df.csv')
+
+    print(df)
 
 
 # RUN THE CRAWLER
@@ -405,22 +546,21 @@ if __name__ == "__main__":
 
     crawler.log(crawler)
 
+    crawler.maximize()
+
     crawler.load_and_accept_cookies()
 
     crawler.collect_links(nof_pages=nof_pages)
 
     crawler.print_links()
 
-    properties_dict = crawler.fetch_contents()
+    properties_dict = crawler.scrap_website()
 
-    df = pd.DataFrame.from_dict(properties_dict)
-    df['TOTAL AREA'] = df['TOTAL AREA'].apply(lambda x: x if x!=0 else np.nan)
-
-    df.to_csv('output/df.csv')
-
-    print(df)
+    clean_and_save_results(properties_dict=properties_dict)
 
     # crawler.exit()
+
+    
 
     # https://postcodes.io
 
